@@ -1,19 +1,49 @@
 {
-  "name": "workspace",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
-    "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
-  },
+  "name": "dineconnect",
+  "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:seed": "tsx lib/seed.ts",
+    "db:clean": "tsx scripts/clear-db.ts",
+    "bot": "tsx services/whatsapp-bot.ts",
+    "bot:vm": "tsx services/whatsapp-bot-vm.ts",
+    "test:agent": "tsx lib/agent/test-agent.ts",
+    "verify": "tsx scripts/verify-full-flow.ts"
+  },
   "dependencies": {
-    "@replit/connectors-sdk": "^0.4.1"
+    "@hapi/boom": "^10.0.1",
+    "@langchain/core": "^1.2.9",
+    "@langchain/langgraph": "^1.4.13",
+    "@langchain/openai": "^1.5.11",
+    "@supabase/supabase-js": "^2.115.0",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "dotenv": "^17.4.2",
+    "langchain": "^1.5.10",
+    "lucide-react": "^1.40.0",
+    "next": "16.3.4",
+    "pino": "^10.3.1",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "prettier": "^3.9.6",
-    "typescript": "~5.9.3"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
+    "@types/qrcode-terminal": "^0.12.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.13",
+    "typescript": "^5"
   }
 }

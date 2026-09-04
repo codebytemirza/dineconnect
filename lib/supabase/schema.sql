@@ -171,7 +171,9 @@ CREATE TABLE IF NOT EXISTS subscription_payments (
 CREATE INDEX IF NOT EXISTS idx_sub_payments_restaurant ON subscription_payments(restaurant_id, payment_date DESC);
 
 -- ============================================
--- WHATSAPP AUTH STATE (Baileys credentials stored in Redis, but we keep a reference table)
+-- WHATSAPP AUTH STATE
+-- Baileys credentials intentionally stay on the local bot host; this table only
+-- records connection metadata for operational reporting.
 -- ============================================
 CREATE TABLE IF NOT EXISTS whatsapp_auth_state (
     restaurant_id TEXT PRIMARY KEY REFERENCES restaurants(id) ON DELETE CASCADE,

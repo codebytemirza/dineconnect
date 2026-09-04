@@ -713,6 +713,25 @@ export async function createUser(user: {
   return data as User;
 }
 
+export async function updateRestaurantUserCredentials(
+  id: string,
+  updates: { username?: string; password?: string; name?: string }
+): Promise<User> {
+  const payload: Record<string, string> = { updated_at: getNowISO() };
+  if (updates.username !== undefined) payload.username = updates.username.trim().toLowerCase();
+  if (updates.password !== undefined) payload.password_hash = hashPassword(updates.password);
+  if (updates.name !== undefined) payload.name = updates.name.trim();
+
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .update(payload)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as User;
+}
+
 export async function getRestaurantUsers(restaurantId: string): Promise<User[]> {
   return findByRestaurant<User>('users', restaurantId, {}, { orderBy: 'created_at', ascending: true });
 }
@@ -798,7 +817,7 @@ export async function deleteKnowledgeBaseItem(id: string): Promise<boolean> {
 
 export async function deleteRestaurantCompletely(restaurantId: string): Promise<boolean> {
   try {
-    const authDir = path.join(process.cwd(), 'data', 'whatsapp-auth', restaurantId);
+    const authDir = path.join(/*turbopackIgnore: true*/ process.cwd(), 'data', 'whatsapp-auth', restaurantId);
     if (fs.existsSync(authDir)) {
       fs.rmSync(authDir, { recursive: true, force: true });
     }

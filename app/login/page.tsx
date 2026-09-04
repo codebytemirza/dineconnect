@@ -87,8 +87,8 @@ export default function LoginPage() {
 
           <div className="relative z-10 space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0f766e] to-teal-800 flex items-center justify-center mx-auto text-white shadow-lg shadow-teal-900/40">
-                <Lock className="w-5 h-5" />
+              <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mx-auto shadow-lg shadow-teal-900/40 p-1.5">
+                <img src="/logo-dineconnect.png" alt="DineConnect logo" className="h-full w-full object-contain" />
               </div>
               <h1 className="text-2xl font-black tracking-tight text-white">
                 Sign in to DineConnect

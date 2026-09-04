@@ -16,12 +16,11 @@ const envSchema = z.object({
   SUPABASE_ANON_KEY: z.string().min(1, 'SUPABASE_ANON_KEY is required'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required'),
 
-  // Upstash Redis Configuration
-  UPSTASH_REDIS_REST_URL: z.string().url('UPSTASH_REDIS_REST_URL must be a valid URL'),
-  UPSTASH_REDIS_REST_TOKEN: z.string().min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
-
   // WhatsApp Service Configuration
   ENABLE_WHATSAPP: z.string().default('true'),
+  // Baileys credentials are stored on the local filesystem for local development.
+  // Vercel Functions have no durable filesystem or process, so the bridge is disabled there.
+  WHATSAPP_AUTH_DIR: z.string().default('./data/whatsapp-auth'),
   
   // Multi-tenant Restaurant Configuration
   DEFAULT_RESTAURANT_ID: z.string().default('burger-joint'),
@@ -29,10 +28,6 @@ const envSchema = z.object({
   // Session Secret for JWT cookies
   SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters').default('dineconnect_ultra_secure_session_secret_2026_change_in_production'),
 
-  // VM Deployment (optional - for bot service)
-  VM_HOST: z.string().optional(),
-  VM_USER: z.string().default('ubuntu'),
-  VM_SSH_KEY_PATH: z.string().optional(),
 });
 
 function validateEnv() {

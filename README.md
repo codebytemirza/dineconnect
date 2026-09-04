@@ -7,10 +7,10 @@
 ## Tech Stack & Architecture
 
 - **Frontend / Dashboard**: Next.js (App Router) + TypeScript + Tailwind CSS + Lucide Icons + Recharts
-- **Agent Layer**: Official Google Agent Development Kit for TypeScript (`@google/adk` v2.0) + Gemini (`gemini-2.5-flash`)
-- **WhatsApp Bridge**: Baileys v7 (`@whiskeysockets/baileys` 7.0.0-rc14) with multi-device file auth state and automatic reconnection
-- **Database Layer**: SQLite with `better-sqlite3` (WAL mode enabled, multi-tenant schema, order idempotency, and customer uniqueness constraints)
-- **API**: Next.js REST API routes reading directly from the local SQLite database
+- **Agent Layer**: LangChain with an OpenAI-compatible model API
+- **Database Layer**: Supabase Postgres, accessed only from server-side API routes
+- **API / Dashboard**: Next.js App Router, deployable to Vercel
+- **WhatsApp Bridge (local only)**: Baileys with local multi-file auth under `data/whatsapp-auth/`; Redis, Upstash, VM, and Vercel storage are not used.
 
 ```
                [Customer WhatsApp]
@@ -73,7 +73,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Running the WhatsApp Bot
+## Deploying to Vercel
+
+Deploy this repository as a standard Next.js application. Set the required Supabase, model-provider, and `SESSION_SECRET` variables in Vercel. Do not add local WhatsApp credentials or a service role key to browser-visible variables.
+
+> Baileys needs a persistent WebSocket process and durable credential files. Browser localStorage cannot run Baileys, and Vercel Functions cannot keep its socket or local files between invocations. The dashboard and API are Vercel-ready, while the WhatsApp bridge is intentionally disabled there and can only run as a local persistent Node process.
+
+## Running the local WhatsApp Bot
 
 The WhatsApp socket runs as a persistent background Node service:
 
@@ -86,7 +92,7 @@ npm run bot
 2. Open WhatsApp on your mobile phone.
 3. Go to **Settings > Linked devices > Link a device**.
 4. Scan the QR code in the terminal.
-5. Once connected, credentials are saved in `./data/whatsapp-auth`. Subsequent restarts connect automatically without re-scanning.
+5. Once connected, credentials are saved in `./data/whatsapp-auth`. Subsequent restarts on that same machine connect automatically without re-scanning.
 
 ---
 
@@ -112,7 +118,7 @@ This verifies:
 | Command | Description |
 |---|---|
 | `npm run dev` | Starts the Next.js dashboard at `http://localhost:3000` |
-| `npm run bot` | Starts the standalone Baileys WhatsApp bot process |
+| `npm run bot` | Starts the standalone local Baileys WhatsApp bot process (not Vercel) |
 | `npm run db:seed` | Initializes schema and seeds restaurant, menu, and sample orders |
 | `npm run test:agent` | Runs ADK Agent isolation tests |
 | `npm run build` | Compiles Next.js production build |

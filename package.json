@@ -10,7 +10,6 @@
     "db:seed": "tsx lib/seed.ts",
     "db:clean": "tsx scripts/clear-db.ts",
     "bot": "tsx services/whatsapp-bot.ts",
-    "bot:vm": "tsx services/whatsapp-bot-vm.ts",
     "test:agent": "tsx lib/agent/test-agent.ts",
     "verify": "tsx scripts/verify-full-flow.ts"
   },

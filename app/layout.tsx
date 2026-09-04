@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: 'Production Multi-Tenant WhatsApp Restaurant Order Automation, Menu, and Analytics',
   icons: {
     icon: '/logo-dineconnect.png',
+    apple: '/logo-dineconnect.png',
+    shortcut: '/logo-dineconnect.png',
   },
 };
 

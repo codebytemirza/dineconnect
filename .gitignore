@@ -20,6 +20,9 @@
 # production
 /build
 
+# Local Baileys credentials. Never commit WhatsApp session keys.
+/data/whatsapp-auth/
+
 # misc
 .DS_Store
 *.pem

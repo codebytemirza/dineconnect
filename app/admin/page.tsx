@@ -24,6 +24,7 @@ import {
   Lock,
   Unlock,
   AlertCircle,
+  Pencil,
 } from 'lucide-react';
 import { useRestaurant } from '@/context/restaurant-context';
 
@@ -92,6 +93,12 @@ export default function SaaSAdminPage() {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
+  const [credentialModalRestaurant, setCredentialModalRestaurant] = useState<AdminRestaurant | null>(null);
+  const [credentialUsername, setCredentialUsername] = useState<string>('');
+  const [credentialPassword, setCredentialPassword] = useState<string>('');
+  const [credentialName, setCredentialName] = useState<string>('');
+  const [credentialSubmitting, setCredentialSubmitting] = useState<boolean>(false);
+  const [credentialError, setCredentialError] = useState<string | null>(null);
 
   // Form State for creating restaurant + credentials
   const [formName, setFormName] = useState<string>('');
@@ -330,6 +337,33 @@ export default function SaaSAdminPage() {
     }
   }
 
+  async function handleUpdateCredentials(e: React.FormEvent) {
+    e.preventDefault();
+    const restaurant = credentialModalRestaurant;
+    const manager = restaurant?.users[0];
+    if (!restaurant || !manager) return;
+    setCredentialSubmitting(true);
+    setCredentialError(null);
+    try {
+      const res = await fetch(`/api/admin/restaurants/${restaurant.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: manager.id, username: credentialUsername, password: credentialPassword, name: credentialName }),
+      });
+      const json = await readJsonResponse<{ success?: boolean; error?: string }>(res, 'Credential update request');
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to update credentials.');
+      setActionNotice(`Login credentials updated for "${restaurant.name}".`);
+      setTimeout(() => setActionNotice(null), 5000);
+      setCredentialModalRestaurant(null);
+      setCredentialPassword('');
+      loadAdminData();
+    } catch (error: any) {
+      setCredentialError(error.message || 'Failed to update credentials.');
+    } finally {
+      setCredentialSubmitting(false);
+    }
+  }
+
   if (userLoading || (user && user.role !== 'superadmin')) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#0a1411] text-white">
@@ -346,8 +380,8 @@ export default function SaaSAdminPage() {
       {/* Top SaaS Header */}
       <header className="px-6 sm:px-12 py-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 bg-[#0a1411]/90 backdrop-blur-md z-30">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e8603c] to-orange-500 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-orange-500/20">
-            D
+          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-1 shadow-lg shadow-orange-500/20">
+            <img src="/logo-dineconnect.png" alt="DineConnect logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -575,10 +609,15 @@ export default function SaaSAdminPage() {
 
                       {/* Manager Login Info */}
                       <div className="bg-white/5 p-2.5 rounded-xl border border-white/5 text-xs flex items-center justify-between">
-                        <span className="text-white/50">Login:</span>
-                        <span className="font-mono font-bold text-emerald-400">
-                          {manager?.username || 'No login'}
-                        </span>
+                        <div>
+                          <span className="text-white/50 block">Login:</span>
+                          <span className="font-mono font-bold text-emerald-400">{manager?.username || 'No login'}</span>
+                        </div>
+                        {manager && <button
+                          onClick={() => { setCredentialModalRestaurant(rest); setCredentialUsername(manager.username); setCredentialName(manager.name); setCredentialPassword(''); setCredentialError(null); }}
+                          className="text-emerald-300 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition"
+                          title="Edit restaurant login"
+                        ><Pencil className="w-3.5 h-3.5" /></button>}
                       </div>
                     </div>
 
@@ -847,6 +886,24 @@ export default function SaaSAdminPage() {
                   {formSubmitting ? 'Creating Restaurant...' : 'Create & Generate Login'}
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {credentialModalRestaurant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#12211d] rounded-3xl max-w-md w-full p-6 border border-white/10 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div><h3 className="text-lg font-black text-white">Edit Restaurant Login</h3><p className="text-xs text-white/50 mt-0.5">{credentialModalRestaurant.name}</p></div>
+              <button onClick={() => setCredentialModalRestaurant(null)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70"><X className="w-4 h-4" /></button>
+            </div>
+            {credentialError && <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-3 rounded-xl text-xs">{credentialError}</div>}
+            <form onSubmit={handleUpdateCredentials} className="space-y-4 text-xs">
+              <div><label className="font-semibold text-white/70">Manager name</label><input required value={credentialName} onChange={(e) => setCredentialName(e.target.value)} className="mt-1.5 w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" /></div>
+              <div><label className="font-semibold text-white/70">Username</label><input required value={credentialUsername} onChange={(e) => setCredentialUsername(e.target.value)} className="mt-1.5 w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" /></div>
+              <div><label className="font-semibold text-white/70">New password <span className="text-white/40">(leave blank to keep current)</span></label><input type="password" minLength={8} value={credentialPassword} onChange={(e) => setCredentialPassword(e.target.value)} className="mt-1.5 w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" /></div>
+              <div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => setCredentialModalRestaurant(null)} className="px-4 py-2 text-white/60 hover:text-white">Cancel</button><button disabled={credentialSubmitting} className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl">{credentialSubmitting ? 'Saving...' : 'Save login'}</button></div>
             </form>
           </div>
         </div>
